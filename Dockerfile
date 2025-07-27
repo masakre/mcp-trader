@@ -15,16 +15,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Optional: Install and compile TA-Lib (comment out if not needed)
 # Uncomment these lines if you want ta-lib support in Docker
-# ENV TALIB_DIR=/usr/local
-# RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz \
-#     && tar -xzf ta-lib-0.6.4-src.tar.gz \
-#     && cd ta-lib-0.6.4/ \
-#     && ./configure --prefix=$TALIB_DIR \
-#     && make -j$(nproc) \
-#     && make install \
-#     && cd .. \
-#     && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/ \
-#     && ldconfig
+ENV TALIB_DIR=/usr/local
+RUN wget https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz \
+    && tar -xzf ta-lib-0.6.4-src.tar.gz \
+    && cd ta-lib-0.6.4/ \
+    && ./configure --prefix=$TALIB_DIR \
+    && make -j$(nproc) \
+    && make install \
+    && cd .. \
+    && rm -rf ta-lib-0.6.4-src.tar.gz ta-lib-0.6.4/ \
+    && ldconfig
 
 # Set the working directory
 WORKDIR /app
@@ -34,6 +34,8 @@ ENV UV_COMPILE_BYTECODE=1
 
 # Copy pyproject.toml and uv.lock for dependencies
 COPY pyproject.toml uv.lock* ./
+# NEW: also copy the project README so hatchling can validate it
+COPY README.md ./
 
 # Install the project's dependencies using the lockfile and settings
 # Note: We're installing base dependencies only (not talib optional)
